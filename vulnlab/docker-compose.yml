@@ -1,0 +1,9 @@
+services:
+  lab:
+    image: php:8.3-cli
+    working_dir: /lab
+    volumes:
+      - ./:/lab
+    command: php -S 0.0.0.0:8080 -t public
+    ports:
+      - "127.0.0.1:8080:8080"   # Solo accesible desde el equipo local
