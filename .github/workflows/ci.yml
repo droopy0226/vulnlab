@@ -1,0 +1,36 @@
+name: CI laboratorio
+
+# Solo valida el código. No despliega: la aplicación es vulnerable a propósito.
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: pdo_sqlite
+          coverage: none
+
+      - name: Revisar sintaxis
+        run: |
+          for f in app/*.php public/*.php; do php -l "$f"; done
+
+      - name: Prueba de humo
+        run: |
+          php -S 127.0.0.1:8080 -t public > server.log 2>&1 &
+          sleep 2
+          curl -fsS http://127.0.0.1:8080/index.php | grep -q "Iniciar sesión"
+          curl -fsS -c jar -b jar -d username=ana -d password=123456 -o /dev/null http://127.0.0.1:8080/index.php
+          curl -fsS -b jar http://127.0.0.1:8080/dashboard.php | grep -q "Saldo"
